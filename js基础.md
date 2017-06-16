@@ -104,8 +104,8 @@
 	在本例中，我们将把 "Doe, John" 转换为 "John Doe" 的形式：
 	
 	```
-name = "Doe, John";
-name.replace(/(\w+)\s*, \s*(\w+)/, "$2 $1");
+	name = "Doe, John";
+	name.replace(/(\w+)\s*, \s*(\w+)/, "$2 $1");
 	```
 	
 6. slice(start,end) 提取字符串的某个部分并返回一个新的字符串(不包含end),负数表示从后往前数.
