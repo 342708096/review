@@ -2,13 +2,82 @@
 
 ## JS基础知识
 
-### 原始类型
-字符串、数字、布尔、Null、Undefined
+### 值类型
+字符串、数字、布尔、Undefined
 
 ### 引用数据类型
-对象、Symbol(es6)
+对象、函数、Symbol(es6)、null
 
 除了Undefined, JavaScript的一切都可以看成对象, 或者说底层回自动包装成对象.
+### typeof 能得到哪些类型？
+
+```
+typeof undefined // undefined
+typeof 'abc' // string
+typeof 123 //number
+typeof true //boolean
+typeof {} //object
+typeof [] //object
+typeof null //object 特殊的引用类型，并没有指向任何地址
+typeof console.log //function
+```
+
+`typeof` 只能区分值类型的数据，不能区分引用类型(除function)，如果要区分引用类型用`instanceof`
+
+### js 发生类型转换的情形
+* 字符串拼接
+
+	```
+	var b = 100 + '10' // '10010'
+	```
+* ==运算符
+
+	```
+	100 == '100' // true 转化为字符串‘100’
+	0 == '' // true 转化为false
+	null == undefined //true 转换为false
+	```
+* if语句（强制转换为boolean类型）
+
+	```
+	//为false的情形
+	if (0) {...}
+	if (NaN) {...}
+	if (null) {...}
+	if ('') {...}
+	if (undefined){...} 
+	if (false) {...}
+	```
+* 逻辑运算 （强制转换为boolean类型）
+
+### 何时使用 ==== 何时使用 ==
+
+```
+	if (obj.a == null ){
+	  // 相当于 obj.a === null || obj.a === undefined
+	}
+```
+除此以外一律用`===`
+
+### JS中有哪些内置函数 -- 数据封装类对象
+* Object
+* Array
+* Boolean
+* Number
+* String
+* Function
+* Date
+* RegExp
+* Error
+
+### JS有哪些内置对象
+* Math
+* JSON
+
+	```
+	JSON.stringify({a: 10, b: 20})
+	JSON.parse('{"a": 10,"b":20}')
+	```
 
 ### Array
 
@@ -225,3 +294,306 @@
 	注释：开头和结尾的空格是允许的。
 	
 	提示：如果字符串的第一个字符不能被转换为数字，那么 parseFloat() 会返回 NaN。	
+	
+## 原型和原型链
+### 构造函数产生对象的过程
+```
+function Foo (name, age) {
+   // this = {}； 将this绑定到一个新的obj
+   // this新对象的`__proto__`的 
+   // `constructor`属性绑定构造函数
+   // this.__proto__ = Foo.prototype； 绑定原型链
+	this.name = name;
+	this.age = age;
+	// return this； 返回obj
+}
+```	
+* **注意**:若构造函数中没有返回值或返回值是**基本类型**(Number, String,Boolean),则返回新的实例对象;
+* 若返回值是引用类型,则实际返回值为这个引用类型(实际上很少用到)
+
+### 构造函数 - 扩展
+* var a = {} 其实是 var a = new Object()的语法糖
+* var a = [] 其实是 var a = new Array()的语法糖
+* function Foo(){...} 其实是 var Foo = new Function()的语法糖
+* 使用instanceof判断一个函数是否是一个变量的构造函数
+
+### 原型规则和示例
+* 所有的引用类型(数组、对象、函数),都具有对象的特性,即可以自由扩展属性(除了`null`)
+* 所有引用类型(数组、对象、函数),都有一个`__proto__`属性,属性值是一个普通的对象(隐式原型)
+* 所有的函数,都有一个prototype属性,属性值也是一个普通的对象(显式原型)
+* 所有的引用类型(数组、对象、函数),`__proto__`属性值指向它的构造函数的`prototype`属性值
+
+	```
+	console.log(obj.__proto__ === Object.prototype) //true
+	```
+* 当试图得到一个对象的某个属性时,如果这个对象本身没有这个属性,那么会去它的`__proto__`(即它的构造函数的`prototype`)中寻找.
+
+```
+for (item in f){
+	// 如果不用`hasOwnProperty` 则会遍历来自原型的属性
+	if (f.hasOwnProperty(item)){
+		console.log(item);
+	}
+}
+```	
+
+```
+//封装一个DOM查询的例子 用原型链
+
+//构造函数
+function Elem(id){
+	this.elem = document.getElementById(id);
+}
+//get set html
+Elem.prototype.html = function(val){
+	var elem = this.elem;
+	if (val){
+		elem.innerHTML = val;
+		return this; //链式调用
+	} else {
+		return elem.innerHTML;
+	}
+
+}
+//事件绑定
+Elem.prototype.on = function(type, fn){
+	 var elem = this.elem;
+	 elem.addEventListener(type, fn);
+	 return this;
+}
+
+var div1 = new Elem('div1');
+div1.html('<p>hello word</p>');
+div1.on('click',function () {
+	alert('click');
+})
+
+```
+
+## 作用域和闭包
+
+### 执行上下文
+* 全局: 变量定义, 函数声明 提升到最前面
+* 函数: 变量定义, 函数声明, this, arguments 
+
+### 变量提升和函数提升
+* 函数声明和函数表达式的区别
+* 变量提升用var声明的变量会提升到作用域的最前面此时并没有赋值(undefined)
+* 函数提升用function来声明函数会提升到作用域的最前面
+
+### this 运行时绑定,定义时无法确认
+
+```
+var a = {
+  name: 'A'
+  fn: function () {
+  	console.log(this.name)
+  }
+}
+a.fn() //this === a
+a.fn.call({name: 'B'}) // this === {name: 'B'}
+var fn1 = a.fn;
+fn1() // this === window
+```	
+应用场景: 
+
+* 作为构造函数执行
+* 作为对象属性执行
+* 作为普通函数执行
+* call apply bind
+
+### 作用域
+* 全局作用域
+* 函数作用域
+* 块级作用域(es6)
+
+### 创建10个`<a>`,点击弹出相应序号 (闭包应用)
+
+```
+function create () {
+	var i,a;
+	for (i = 0; i < 10; i++ ){
+	 (function(i){
+	 	a = document.createElement('a');
+		a.innerHTML = 'a标签' + i + '<br>';
+		a.addEventListener('click', function(e){
+			e.preventDefault();
+			alert(i);
+
+		});
+		document.body.appendChild(a);
+	 })(i)
+	}
+}
+```
+```
+//es6 写法
+function create () {
+	for (let i = 0; i < 10; i++ ){
+	 	const a = document.createElement('a');
+		a.innerHTML = 'a标签' + i + '<br>';
+		a.addEventListener('click', function(e){
+			e.preventDefault();
+			alert(i);
+
+		});
+		document.body.appendChild(a);
+	}
+}
+```
+
+## DOM (Document Object Model)
+### 数据结构 (tree)
+### 本质
+符合W3C标准的XML
+### 常用API有哪些
+* 获取DOM节点
+
+```
+var div1 = document.getElementById('div1');
+var divList = document.getElementsByTagName('div');
+console.log(divList.length);
+console.log(divList[0]);
+
+var containerList = document.getElementsByClassName('.container');//集合
+var pList = document.querySelectorAll('p');//集合
+var obj = document.querySelector("#id");
+var obj = document.querySelector(".classname");
+var obj = document.querySelector("div");
+var el = document.body.querySelector("style[type='text/css'], style:not([type])");
+```
+
+```
+var pList = document.querySelectorAll('p')
+var p = pList[0];
+console.log(p.style.width) // 获取样式
+p.style.width = '100px';//修改样式
+console.log(p.className)//获取class
+p.className = 'p1' //修改class
+
+//获取 nodeName 和 nodeType
+console.log(p.nodeName); // P 大写
+console.log(p.nodeType); // 1 元素节点 2 属性节点 3 TEXT
+
+//Attribute
+var pList = document.querySelectorAll('p')
+var p = pList[0];
+p.getAttribute('data-name');
+p.setAttribute('data-name', 'imooc');
+p.getAttribute('style');
+p.setAttribute('style', 'font-size:30px')
+```
+```
+var div1 = document.getElementById('div1');
+//添加新的节点
+var p1 = document.createElement('p');
+p1.innerHTML = 'this is p1';
+div1.appendChild(p1); //添加新创建的元素
+//移动已有节点
+var p2 = document.getElementById('p2')
+div1.appendChild(p2);
+var parent = div1.parentElement
+var children = div1.childNodes //所有子节点包括TEXT
+div1.removeChild(children[0]); 
+```
+### DOM节点的attr 和 property 有何区别?
+* property是DOM中的属性，是JavaScript里的对象；
+* attribute是HTML标签上的特性，它的值只能够是字符串；
+
+## BOM (Browser Object Model)
+
+### location
+* location.href //整个url `http://www.baidu.com`
+* location.protocol // `http:` or `https:`
+* location.host // 域名
+* location.port // 端口 http默认80 https443
+* location.pathname // 路径 `/classindex.html`
+* location.search // query `?oid=1231233`
+* location.hash // hash `#page=1`
+
+### navigator
+* navigator.userAgent //判断浏览器类型,操作系统
+
+### screen
+* screen.width
+* screen.height
+
+### history
+* history.forward()
+* history.back()
+
+## 事件冒泡
+### 编写一个通用的事件绑定函数
+```
+function bindEvent(elem, type, selector, fn) {
+	if (fn == null) {
+		fn = selector;
+		selector = null;
+	}
+	elem.addEventListener(type, function(e){
+		var target ;
+		if (selector) {
+			target = e.target;
+			if (target.matches(selector)){ //'a.btn'
+				fn.call(target, e);
+			}
+		} else {
+			fn.call(elem, e);
+		}
+	})
+}
+```
+
+* 代理
+* 阻止冒泡 e.stropPropagation();
+
+## Ajax 
+* XMLHttpRequest
+* 状态码
+* 跨域
+
+### 编写一个ajax,不依赖第三方库
+```
+var xhr = new XMLHttpRequest();
+xhr.open("GET", '/api', false) //false 表示异步
+xhr.onreadystatechange = function () {
+	// 0 未初始化还未调用send
+	// 1 (载入) 已经调用send,正在发送
+	// 2 (载入完成) send()执行完成,已经接收
+	// 3 (交互) 正在解析响应内容
+	// 4 (完成) 响应内容解析完成,可以在客户端调用
+
+	if (xhr.readyState === 4) {
+		if (xhr.status === 200) {
+			alert(xhr.responseText);
+		}
+	}
+}
+xhr.send(nulll);
+```
+
+### 跨域问题
+* 浏览器同源策略,协议、域名、端口,有一个不同就算跨域
+* 跨域方法 JSONP CORS
+* 三个可以跨域的标签 `<img src="xxxx">` `<link href="xxxxx">` `<script src="xxx">`
+
+## 存储
+
+### cookie
+* 最大支持4k
+* 只能存储字符串
+* 每次请求都会携带
+* `document.cookie = "xxxxx"` 获取和修改
+
+### sessionStorage
+* 最大支持5M
+* 可以以key value存储`setItem(key,value)`和 `getItem(key)`;
+* 浏览器关闭清空
+
+### localStorage
+* 最大支持5M
+* 可以以key value存储
+* 一般不会清空
+* IOS safari隐藏模式下 localStorage.getItem 会报错
+
+
