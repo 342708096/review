@@ -597,3 +597,32 @@ xhr.send(nulll);
 * IOS safari隐藏模式下 localStorage.getItem 会报错
 
 
+## 合并DOM插入
+
+```
+var listNode = document.getElementById('list')
+var frag = document.createDocumentFragment();
+var x, li
+for (x = 0; x < 10; x++) {
+	li = document.createElement("li");
+	li.innerHTML = 'List item ' + x;
+	frag.appendChild(li);
+}
+
+listNode.appendChild(frag);
+```
+
+## 性能优化
+* 资源合并
+* 静态资源缓存(浏览器缓存)
+* CDN(bootcss)
+* 后端渲染
+* 懒加载
+* 缓存DOM查询
+* 减少DOM操作次数(合并DOM插入)
+* 事件除颤(debounce)
+* 尽早操作(DOMContentLoaded)
+
+## 安全性
+* XSS跨站请求攻击(escape转义字符)
+* XSRF跨站请求伪造(增加验证)
