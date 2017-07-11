@@ -442,6 +442,27 @@ function create () {
 }
 ```
 
+### caller 和 callee
+* caller返回一个函数的引用,表示这个函数调用了当前的函数,如果由顶层调用则返回null
+* callee是arguments的一个属性,指向当前函数本身
+
+```
+var a = function() {   
+	alert(a.caller === b);   
+}   
+var b = function() {   
+	a();   
+}   
+b(); // true
+```
+
+```
+var a = function() {   
+	alert(arguments.callee === a);    
+} 
+a(); // true
+```
+
 ## DOM (Document Object Model)
 ### 数据结构 (tree)
 ### 本质
@@ -625,4 +646,4 @@ listNode.appendChild(frag);
 
 ## 安全性
 * XSS跨站请求攻击(escape转义字符)
-* XSRF跨站请求伪造(增加验证)
+* CSRF跨站请求伪造(增加验证)
