@@ -597,6 +597,25 @@ xhr.send(nulll);
 * 浏览器同源策略,协议、域名、端口,有一个不同就算跨域
 * 跨域方法 JSONP CORS
 * 三个可以跨域的标签 `<img src="xxxx">` `<link href="xxxxx">` `<script src="xxx">`
+* CORS 简单请求
+
+	某些请求不会触发 CORS 预检请求。本文称这样的请求为“简单请求”，请注意，该术语并不属于 Fetch （其中定义了 CORS）规范。若请求满足所有下述条件，则该请求可视为“简单请求”：
+	
+	使用下列方法之一：
+	
+	GET
+	HEAD
+	POST
+	Content-Type ：
+	//注:仅当POST方法的Content-Type值等于下列之一才算作简单请求
+	text/plain
+	multipart/form-data
+	application/x-www-form-urlencoded
+	Fetch 规范定义了对 CORS 安全的首部字段集合，不得人为设置该集合之外的其他首部字段。该集合为：
+	Accept
+	Accept-Language
+	Content-Language
+	Content-Type （需要注意额外的限制）
 
 ## 存储
 
@@ -632,6 +651,8 @@ for (x = 0; x < 10; x++) {
 
 listNode.appendChild(frag);
 ```
+## 缓存
+* Cache-Control:no-cache
 
 ## 性能优化
 * 资源合并
@@ -647,3 +668,4 @@ listNode.appendChild(frag);
 ## 安全性
 * XSS跨站请求攻击(escape转义字符)
 * CSRF跨站请求伪造(增加验证)
+
